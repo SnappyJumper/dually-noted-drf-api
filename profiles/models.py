@@ -8,6 +8,7 @@ class UserProfile(models.Model):
     profile_picture = models.ImageField(
         upload_to='images/',default='../default_profile_ehutqv'
     )
+    name = models.CharField(max_length=255, blank=True)
     bio = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -15,7 +16,7 @@ class UserProfile(models.Model):
         ordering = ['-created_at']
     
     def __str__(self):
-        return f"{self.user}'s profile"
+        return f"{self.name}'s profile"
     
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
