@@ -6,32 +6,34 @@ from .models import UserProfile
 from .serializers import UserProfileSerializer
 from dually_noted_drf_api.permissions import IsOwnerOrReadOnly
 
+
 class ProfileList(APIView):
     def get(self, request):
         profiles = UserProfile.objects.all()
         serializer = UserProfileSerializer(
             profiles, many=True, context={'request': request})
         return Response(serializer.data)
-    
+
 
 class ProfileDetail(APIView):
     serializer_class = UserProfileSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
     def get_object(self, pk):
         try:
-            profile= UserProfile.objects.get(pk=pk)
+            profile = UserProfile.objects.get(pk=pk)
             self.check_object_permissions(self.request, profile)
             return profile
-        except Profile.DoesNotExist:
+        except UserProfile.DoesNotExist:
             raise Http404
-        
+
     def get(self, request, pk):
         profile = self.get_object(pk)
         serializer = UserProfileSerializer(
             profile, context={'request': request})
         return Response(serializer.data)
 
-    def put (self, request, pk):
+    def put(self, request, pk):
         profile = self.get_object(pk)
         print("Uploaded file:", request.FILES.get('image'))
         serializer = UserProfileSerializer(
