@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import UserProfile
 from .serializers import UserProfileSerializer
-
+from dually_noted_drf_api.permissions import IsOwnerOrReadOnly
 
 class ProfileList(APIView):
     def get(self, request):
@@ -15,9 +15,11 @@ class ProfileList(APIView):
 
 class ProfileDetail(APIView):
     serializer_class = UserProfileSerializer
+    permission_classes = [IsOwnerOrReadOnly]
     def get_object(self, pk):
         try:
             profile= UserProfile.objects.get(pk=pk)
+            self.check_object_permissions(self.request, profile)
             return profile
         except Profile.DoesNotExist:
             raise Http404
