@@ -9,7 +9,8 @@ from dually_noted_drf_api.permissions import IsOwnerOrReadOnly
 class ProfileList(APIView):
     def get(self, request):
         profiles = UserProfile.objects.all()
-        serializer = UserProfileSerializer(profiles, many=True)
+        serializer = UserProfileSerializer(
+            profiles, many=True, context={'request': request})
         return Response(serializer.data)
     
 
@@ -26,13 +27,16 @@ class ProfileDetail(APIView):
         
     def get(self, request, pk):
         profile = self.get_object(pk)
-        serializer = UserProfileSerializer(profile)
+        serializer = UserProfileSerializer(
+            profile, context={'request': request})
         return Response(serializer.data)
 
     def put (self, request, pk):
         profile = self.get_object(pk)
         print("Uploaded file:", request.FILES.get('image'))
-        serializer = UserProfileSerializer(profile, data=request.data)
+        serializer = UserProfileSerializer(
+            profile, data=request.data, context={'request': request}
+            )
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
