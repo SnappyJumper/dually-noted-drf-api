@@ -18,6 +18,13 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # Django Rest Framework browsable API authentication
     path('api-auth/', include('rest_framework.urls')),
+
+    # Profile
     path('', include('profiles.urls')),
+
+    # Note
+    path('', include('note.urls')),
 ]
