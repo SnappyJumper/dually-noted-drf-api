@@ -37,7 +37,7 @@ class NoteDetail(APIView):
 
     def get_object(self, pk):
         try:
-            note =Note.objects.get(pk=pk)
+            note = Note.objects.get(pk=pk)
             self.check_object_permissions(self.request, note)
             return note
         except Note.DoesNotExist:
