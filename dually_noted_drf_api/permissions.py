@@ -1,4 +1,5 @@
 from rest_framework import permissions
+from note.models import SharedNote
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
@@ -20,12 +21,16 @@ class CanViewOrEditSharedNote(permissions.BasePermission):
     """
     Shared user can:
     - View the shared note if they have permission.
-    - Edit only if there permission is 'edit'.
+    - Edit only if their permission is 'edit'.
     Owner of the note can always view and modify.
     """
-    def has_object_permission(self, request, view, obj):
-        user = request.user
 
+    def has_object_permission(self, request, view, obj):
+        # Defensive check to prevent misuse
+        if not isinstance(obj, SharedNote):
+            return False  # Or raise a clear error if you'd prefer
+
+        user = request.user
         is_owner = obj.note.user == user
         is_shared_user = obj.shared_with == user
 

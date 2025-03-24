@@ -1,5 +1,6 @@
 from django.http import Http404
 from rest_framework import status
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -69,7 +70,7 @@ class SharedNoteList(APIView):
 
     def get(self, request):
         shared_notes = SharedNote.objects.filter(
-            Q(note_user=request.user) | Q(shared_with=request.user)
+            Q(note__user=request.user) | Q(shared_with=request.user)
         ).distinct()
         serializer = SharedNoteSerializer(
             shared_notes, many=True, context={'request': request}
@@ -100,23 +101,33 @@ class SharedNoteDetail(APIView):
         try:
             shared_note = SharedNote.objects.get(pk=pk)
             self.check_object_permissions(self.request, shared_note)
-            return shared_note
         except SharedNote.DoesNotExist:
             raise Http404
 
+        return shared_note
+
     def get(self, request, pk):
         shared_note = self.get_object(pk)
-        serializer = SharedNoteSerializer(
-            shared_note, context={'request': request}
-        )
+        note = shared_note.note
+
+        serializer = NoteSerializer(note, context={'request': request})
         return Response(serializer.data)
 
     def put(self, request, pk):
         shared_note = self.get_object(pk)
-        serializer = SharedNoteSerializer(
-            shared_note,
-            data=request.data,
-            context={'request': request}
+        note = shared_note.note
+
+        # Ensure the user has 'edit' permission
+        if (
+            shared_note.shared_with != request.user
+            or shared_note.permission != 'edit'
+        ):
+            raise PermissionDenied(
+                "You do not have permission to edit this note."
+            )
+
+        serializer = NoteSerializer(
+            note, data=request.data, context={'request': request}
         )
         if serializer.is_valid():
             serializer.save()
