@@ -3,11 +3,6 @@ from .models import Note, SharedNote, Tag
 
 
 class TagSerializer(serializers.ModelSerializer):
-    is_owner = serializers.SerializerMethodField()
-
-    def get_is_owner(self, obj):
-        # No ownership tracking, so always False (or you can omit this field)
-        return False
 
     class Meta:
         model = Tag
@@ -42,7 +37,9 @@ class NoteSerializer(serializers.ModelSerializer):
 
 class SharedNoteSerializer(serializers.ModelSerializer):
     note_title = serializers.ReadOnlyField(source='note.title')
-    shared_with_username = serializers.ReadOnlyField(source='shared_with.username')
+    shared_with_username = serializers.ReadOnlyField(
+        source='shared_with.username'
+    )
     is_owner = serializers.SerializerMethodField()
 
     def get_is_owner(self, obj):
