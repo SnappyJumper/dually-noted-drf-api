@@ -6,7 +6,7 @@ class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tag
-        fields = ['id', 'name', 'created_at', 'is_owner']
+        fields = ['id', 'name', 'created_at']
         read_only_fields = ['id', 'created_at']
 
 
@@ -53,4 +53,6 @@ class SharedNoteSerializer(serializers.ModelSerializer):
             'shared_with', 'shared_with_username',
             'permission', 'shared_at', 'is_owner'
         ]
-        read_only_fields = ['id', 'note_title', 'shared_with_username', 'shared_at']
+        read_only_fields = [
+            'id', 'note_title', 'shared_with_username', 'shared_at'
+        ]
