@@ -36,7 +36,7 @@ class NoteSerializer(serializers.ModelSerializer):
 
 
 class SharedNoteSerializer(serializers.ModelSerializer):
-    note_title = serializers.ReadOnlyField(source='note.title')
+    note = NoteSerializer(read_only=True)
     shared_with_username = serializers.ReadOnlyField(
         source='shared_with.username'
     )
