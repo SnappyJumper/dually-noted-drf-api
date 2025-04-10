@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import UserProfile, SharedNote
+from .models import UserProfile
+from note.models import SharedNote
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
