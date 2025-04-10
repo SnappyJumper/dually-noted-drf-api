@@ -36,7 +36,9 @@ class NoteSerializer(serializers.ModelSerializer):
 
 
 class SharedNoteSerializer(serializers.ModelSerializer):
-    note = NoteSerializer(read_only=True)
+    note = serializers.PrimaryKeyRelatedField(
+        queryset=Note.objects.all()
+    )
     shared_with_username = serializers.ReadOnlyField(
         source='shared_with.username'
     )
@@ -49,13 +51,11 @@ class SharedNoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = SharedNote
         fields = [
-            'id', 'note', 'note',
+            'id', 'note',
             'shared_with', 'shared_with_username',
             'permission', 'shared_at', 'is_owner'
         ]
-        read_only_fields = [
-            'id', 'note', 'shared_with_username', 'shared_at'
-        ]
+        read_only_fields = ['id', 'shared_with_username', 'shared_at']
 
 
 class SharedNoteDetailSerializer(serializers.ModelSerializer):
