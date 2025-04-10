@@ -76,7 +76,7 @@ class SharedNoteList(APIView):
         shared_notes = SharedNote.objects.filter(
             Q(note__user=request.user) | Q(shared_with=request.user)
         ).distinct()
-        serializer = SharedNoteSerializer(
+        serializer = SharedNoteDetailSerializer(
             shared_notes, many=True, context={'request': request}
         )
         return Response(serializer.data)
@@ -120,9 +120,7 @@ class SharedNoteDetail(APIView):
         shared_note = self.get_object(pk)
 
         if shared_note.permission != "edit":
-            raise PermissionDenied(
-                "You do not have permission to edit this note."
-            )
+            raise PermissionDenied("You do not have permission to edit this note.")
 
         serializer = SharedNoteDetailSerializer(
             shared_note,
