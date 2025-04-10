@@ -43,3 +43,23 @@ class ProfileDetail(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class PublicProfileDetail(APIView):
+    """
+    Read-only view of a user's profile by username.
+    Used for linking to profile from shared notes.
+    """
+    def get_object(self, username):
+        try:
+            return UserProfile.objects.select_related('user') \
+                .get(user__username=username)
+        except UserProfile.DoesNotExist:
+            raise Http404("User profile not found.")
+
+    def get(self, request, username):
+        profile = self.get_object(username)
+        serializer = UserProfileSerializer(
+            profile, context={'request': request}
+        )
+        return Response(serializer.data)

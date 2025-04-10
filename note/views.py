@@ -120,7 +120,9 @@ class SharedNoteDetail(APIView):
         shared_note = self.get_object(pk)
 
         if shared_note.permission != "edit":
-            raise PermissionDenied("You do not have permission to edit this note.")
+            raise PermissionDenied(
+                "You do not have permission to edit this note."
+            )
 
         serializer = SharedNoteDetailSerializer(
             shared_note,
