@@ -56,3 +56,33 @@ class SharedNoteSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'id', 'note', 'shared_with_username', 'shared_at'
         ]
+
+
+class SharedNoteDetailSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(source="note.title")
+    content = serializers.CharField(source="note.content")
+    permission = serializers.CharField(read_only=True)
+    is_owner = serializers.SerializerMethodField()
+    user = serializers.ReadOnlyField(source="note.user.username")
+
+    def get_is_owner(self, obj):
+        request = self.context.get("request")
+        return obj.note.user == request.user
+
+    def update(self, instance, validated_data):
+        # request = self.context.get("request")
+
+        if instance.permission != "edit":
+            raise serializers.ValidationError(
+                "You do not have permission to edit this note."
+            )
+
+        note_data = validated_data.get("note", {})
+        instance.note.title = note_data.get("title", instance.note.title)
+        instance.note.content = note_data.get("content", instance.note.content)
+        instance.note.save()
+        return instance
+
+    class Meta:
+        model = SharedNote
+        fields = ["id", "title", "content", "user", "permission", "is_owner"]

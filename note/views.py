@@ -5,9 +5,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
-
 from .models import Note, SharedNote, Tag
-from .serializers import NoteSerializer, SharedNoteSerializer, TagSerializer
+from .serializers import (
+    NoteSerializer,
+    SharedNoteSerializer,
+    TagSerializer,
+    SharedNoteDetailSerializer,
+)
 from dually_noted_drf_api.permissions import (
     IsNoteOwner, CanViewOrEditSharedNote
 )
@@ -99,38 +103,30 @@ class SharedNoteDetail(APIView):
 
     def get_object(self, pk):
         try:
-            shared_note = SharedNote.objects.get(pk=pk)
+            shared_note = SharedNote.objects.select_related('note').get(pk=pk)
             self.check_object_permissions(self.request, shared_note)
+            return shared_note
         except SharedNote.DoesNotExist:
-            raise Http404
-
-        return shared_note
+            raise Http404("Shared note not found.")
 
     def get(self, request, pk):
         shared_note = self.get_object(pk)
-        note = shared_note.note
-
-        serializer = NoteSerializer(note, context={'request': request})
+        serializer = SharedNoteDetailSerializer(shared_note, context={'request': request})
         return Response(serializer.data)
 
     def put(self, request, pk):
         shared_note = self.get_object(pk)
-        note = shared_note.note
 
-        # Ensure the user has 'edit' permission
-        if (
-            shared_note.shared_with != request.user
-            or shared_note.permission != 'edit'
-        ):
-            raise PermissionDenied(
-                "You do not have permission to edit this note."
-            )
+        if shared_note.permission != "edit":
+            raise PermissionDenied("You do not have permission to edit this note.")
 
-        serializer = NoteSerializer(
-            note, data=request.data, context={'request': request}
+        serializer = SharedNoteDetailSerializer(
+            shared_note,
+            data=request.data,
+            context={'request': request}
         )
         if serializer.is_valid():
-            serializer.save()
+            serializer.save()  # Calls your custom update method
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -138,6 +134,7 @@ class SharedNoteDetail(APIView):
         shared_note = self.get_object(pk)
         shared_note.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 
 class TagList(APIView):
