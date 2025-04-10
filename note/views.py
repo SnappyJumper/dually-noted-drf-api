@@ -111,14 +111,18 @@ class SharedNoteDetail(APIView):
 
     def get(self, request, pk):
         shared_note = self.get_object(pk)
-        serializer = SharedNoteDetailSerializer(shared_note, context={'request': request})
+        serializer = SharedNoteDetailSerializer(
+            shared_note, context={'request': request}
+        )
         return Response(serializer.data)
 
     def put(self, request, pk):
         shared_note = self.get_object(pk)
 
         if shared_note.permission != "edit":
-            raise PermissionDenied("You do not have permission to edit this note.")
+            raise PermissionDenied(
+                "You do not have permission to edit this note."
+            )
 
         serializer = SharedNoteDetailSerializer(
             shared_note,
@@ -134,7 +138,6 @@ class SharedNoteDetail(APIView):
         shared_note = self.get_object(pk)
         shared_note.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
 
 
 class TagList(APIView):
