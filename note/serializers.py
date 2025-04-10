@@ -4,11 +4,6 @@ from .models import Note, SharedNote, Tag
 
 class TagSerializer(serializers.ModelSerializer):
 
-    def validate_name(self, value):
-        if not value.strip():
-            raise serializers.ValidationError("Tag name cannot be blank.")
-        return value
-
     class Meta:
         model = Tag
         fields = ['id', 'name', 'created_at']
@@ -29,16 +24,6 @@ class NoteSerializer(serializers.ModelSerializer):
     def get_is_owner(self, obj):
         request = self.context.get('request')
         return request.user == obj.user
-
-    def validate_title(self, value):
-        if not value.strip():
-            raise serializers.ValidationError("Title cannot be blank.")
-        return value
-
-    def validate_content(self, value):
-        if not value.strip():
-            raise serializers.ValidationError("Content cannot be blank.")
-        return value
 
     class Meta:
         model = Note
@@ -62,30 +47,6 @@ class SharedNoteSerializer(serializers.ModelSerializer):
     def get_is_owner(self, obj):
         request = self.context.get('request')
         return obj.note.user == request.user
-    
-    def validate(self, data):
-        request = self.context['request']
-        note = data['note']
-        shared_with = data['shared_with']
-
-        if note.user != request.user:
-            raise serializers.ValidationError(
-                "You can only share notes you own."
-            )
-
-        if shared_with == request.user:
-            raise serializers.ValidationError(
-                "You cannot share a note with yourself."
-            )
-
-        if SharedNote.objects.filter(
-            note=note, shared_with=shared_with
-        ).exists():
-            raise serializers.ValidationError(
-                "This note is already shared with that user."
-            )
-
-        return data
 
     class Meta:
         model = SharedNote
@@ -109,6 +70,7 @@ class SharedNoteDetailSerializer(serializers.ModelSerializer):
         return obj.note.user == request.user
 
     def update(self, instance, validated_data):
+        # request = self.context.get("request")
 
         if instance.permission != "edit":
             raise serializers.ValidationError(
@@ -124,3 +86,4 @@ class SharedNoteDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = SharedNote
         fields = ["id", "title", "content", "user", "permission", "is_owner"]
+
