@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from .models import UserProfile
 from .serializers import UserProfileSerializer
 from dually_noted_drf_api.permissions import IsOwnerOrReadOnly
+from .serializers import PublicUserProfileSerializer
 
 
 class ProfileList(APIView):
@@ -46,10 +47,6 @@ class ProfileDetail(APIView):
     
 
 class PublicProfileDetail(APIView):
-    """
-    Read-only view of a user's profile by username.
-    Used for linking to profile from shared notes.
-    """
     def get_object(self, username):
         try:
             return UserProfile.objects.select_related('user') \
@@ -59,7 +56,7 @@ class PublicProfileDetail(APIView):
 
     def get(self, request, username):
         profile = self.get_object(username)
-        serializer = UserProfileSerializer(
+        serializer = PublicUserProfileSerializer(  # ⬅️ use the new serializer
             profile, context={'request': request}
         )
         return Response(serializer.data)

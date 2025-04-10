@@ -86,3 +86,12 @@ class SharedNoteDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = SharedNote
         fields = ["id", "title", "content", "user", "permission", "is_owner"]
+
+    class SharedNotePreviewSerializer(serializers.ModelSerializer):
+        title = serializers.CharField(source="note.title")
+        content = serializers.CharField(source="note.content")
+        permission = serializers.CharField()
+
+        class Meta:
+            model = SharedNote
+            fields = ["id", "title", "content", "permission"]
