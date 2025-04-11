@@ -8,18 +8,31 @@ from dually_noted_drf_api.permissions import IsOwnerOrReadOnly
 
 
 class ProfileList(APIView):
+    """
+    Handles listing all user profiles.
+    """
+
     def get(self, request):
         profiles = UserProfile.objects.all()
         serializer = UserProfileSerializer(
-            profiles, many=True, context={'request': request})
+            profiles, many=True, context={'request': request}
+        )
         return Response(serializer.data)
 
 
 class ProfileDetail(APIView):
+    """
+    Retrieve, update, or delete a specific user profile by ID.
+    Only the owner of the profile has permission to update it.
+    """
     serializer_class = UserProfileSerializer
     permission_classes = [IsOwnerOrReadOnly]
 
     def get_object(self, pk):
+        """
+        Helper method to retrieve the profile instance by primary key.
+        Raises 404 if not found or permission is denied.
+        """
         try:
             profile = UserProfile.objects.get(pk=pk)
             self.check_object_permissions(self.request, profile)
@@ -28,17 +41,23 @@ class ProfileDetail(APIView):
             raise Http404
 
     def get(self, request, pk):
+        """
+        Returns the profile data for the given ID.
+        """
         profile = self.get_object(pk)
         serializer = UserProfileSerializer(
-            profile, context={'request': request})
+            profile, context={'request': request}
+        )
         return Response(serializer.data)
 
     def put(self, request, pk):
+        """
+        Updates the profile with data provided by the owner.
+        """
         profile = self.get_object(pk)
-        print("Uploaded file:", request.FILES.get('image'))
         serializer = UserProfileSerializer(
             profile, data=request.data, context={'request': request}
-            )
+        )
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -48,9 +67,14 @@ class ProfileDetail(APIView):
 class PublicProfileDetail(APIView):
     """
     Read-only view of a user's profile by username.
-    Used for linking to profile from shared notes.
+    This is primarily used to show user info when viewing shared notes.
     """
+
     def get_object(self, username):
+        """
+        Fetches the profile for the given username.
+        Raises 404 if not found.
+        """
         try:
             return UserProfile.objects.select_related('user') \
                 .get(user__username=username)
@@ -58,6 +82,9 @@ class PublicProfileDetail(APIView):
             raise Http404("User profile not found.")
 
     def get(self, request, username):
+        """
+        Returns the profile data for the given username.
+        """
         profile = self.get_object(username)
         serializer = UserProfileSerializer(
             profile, context={'request': request}

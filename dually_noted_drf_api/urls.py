@@ -21,7 +21,7 @@ urlpatterns = [
 
     # Root route
     path('', root_route),
-    
+
     # Admin
     path('admin/', admin.site.urls),
 

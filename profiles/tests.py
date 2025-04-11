@@ -1,3 +1,3 @@
-from django.test import TestCase
+# Removed unused import of TestCase
 
 # Create your tests here.

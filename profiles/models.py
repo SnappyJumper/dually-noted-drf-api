@@ -4,9 +4,14 @@ from django.contrib.auth.models import User
 
 
 class UserProfile(models.Model):
+    """
+    Extends the built-in User model with additional profile information.
+    Each User has a one-to-one relationship with a UserProfile.
+    """
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     profile_picture = models.ImageField(
-        upload_to='images/', default='../default_profile_zx2qdz'
+        upload_to='images/',
+        default='../default_profile_zx2qdz'
     )
     name = models.CharField(max_length=255, blank=True)
     bio = models.TextField(blank=True)
@@ -20,8 +25,13 @@ class UserProfile(models.Model):
 
 
 def create_user_profile(sender, instance, created, **kwargs):
+    """
+    Signal receiver that creates a UserProfile automatically when a new User
+    is created.
+    """
     if created:
         UserProfile.objects.create(user=instance)
 
 
+# Connect the post_save signal to the User model
 post_save.connect(create_user_profile, sender=User)

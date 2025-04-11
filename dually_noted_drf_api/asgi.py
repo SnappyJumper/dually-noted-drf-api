@@ -11,6 +11,8 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dually_noted_drf_api.settings')
+os.environ.setdefault(
+      'DJANGO_SETTINGS_MODULE', 'dually_noted_drf_api.settings'
+)
 
 application = get_asgi_application()

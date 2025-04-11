@@ -3,6 +3,11 @@ from .models import Note, SharedNote, Tag
 
 
 class TagSerializer(serializers.ModelSerializer):
+    """
+    Serializer for tag objects.
+    Handles validation to ensure tag names are unique and not blank.
+    """
+
     class Meta:
         model = Tag
         fields = ['id', 'name', 'created_at']
@@ -18,6 +23,11 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class NoteSerializer(serializers.ModelSerializer):
+    """
+    Serializer for note objects.
+    Includes tag information and ownership status.
+    Handles validation for blank fields.
+    """
     user = serializers.ReadOnlyField(source='user.username')
     is_owner = serializers.SerializerMethodField()
     tags = TagSerializer(many=True, read_only=True)
@@ -32,7 +42,6 @@ class NoteSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         return request.user == obj.user
 
-    # ✅ Field-level validation
     def validate_title(self, value):
         if not value.strip():
             raise serializers.ValidationError("Title cannot be blank.")
@@ -54,6 +63,10 @@ class NoteSerializer(serializers.ModelSerializer):
 
 
 class SharedNoteSerializer(serializers.ModelSerializer):
+    """
+    Serializer for creating shared notes.
+    Enforces constraints like ownership and duplicate sharing.
+    """
     note = serializers.PrimaryKeyRelatedField(queryset=Note.objects.all())
     shared_with_username = serializers.ReadOnlyField(
         source='shared_with.username'
@@ -96,6 +109,10 @@ class SharedNoteSerializer(serializers.ModelSerializer):
 
 
 class SharedNoteDetailSerializer(serializers.ModelSerializer):
+    """
+    Serializer for retrieving or updating a shared note's content.
+    Only editable if the user has 'edit' permission.
+    """
     title = serializers.CharField(source="note.title")
     content = serializers.CharField(source="note.content")
     permission = serializers.CharField(read_only=True)
@@ -107,8 +124,7 @@ class SharedNoteDetailSerializer(serializers.ModelSerializer):
         return obj.note.user == request.user
 
     def update(self, instance, validated_data):
-        # request = self.context.get("request")
-
+        # Only allow update if user has 'edit' permission
         if instance.permission != "edit":
             raise serializers.ValidationError(
                 "You do not have permission to edit this note."
