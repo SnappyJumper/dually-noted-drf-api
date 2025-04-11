@@ -36,7 +36,10 @@ class NoteList(APIView):
             return Response(
                 serializer.data, status=status.HTTP_201_CREATED
             )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class NoteDetail(APIView):
@@ -63,7 +66,10 @@ class NoteDetail(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     def delete(self, request, pk):
         note = self.get_object(pk)
@@ -73,6 +79,16 @@ class NoteDetail(APIView):
 
 class SharedNoteList(APIView):
     permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        shared_notes = SharedNote.objects.filter(
+            Q(note__user=request.user) | Q(shared_with=request.user)
+        ).distinct()
+
+        serializer = SharedNoteDetailSerializer(
+            shared_notes, many=True, context={'request': request}
+        )
+        return Response(serializer.data)
 
     def post(self, request):
         serializer = SharedNoteSerializer(
@@ -91,7 +107,10 @@ class SharedNoteList(APIView):
                     )
 
                 serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(
+                    serializer.data,
+                    status=status.HTTP_201_CREATED
+                )
 
             print("❌ Validation errors:", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -99,6 +118,7 @@ class SharedNoteList(APIView):
         except Exception as e:
             print("🔥 Exception in POST /shared-notes/:", str(e))
             return Response({"detail": "Server error occurred."}, status=500)
+
 
 
 class SharedNoteDetail(APIView):
