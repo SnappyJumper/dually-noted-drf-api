@@ -73,9 +73,10 @@ class SharedNoteList(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        # Only show notes that are shared *with* the current user
         shared_notes = SharedNote.objects.filter(
-            Q(note__user=request.user) | Q(shared_with=request.user)
-        ).distinct()
+            shared_with=request.user
+        )
         serializer = SharedNoteDetailSerializer(
             shared_notes, many=True, context={'request': request}
         )
