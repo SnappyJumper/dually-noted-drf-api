@@ -136,6 +136,13 @@ class SharedNoteDetail(APIView):
 
     def delete(self, request, pk):
         shared_note = self.get_object(pk)
+
+        if shared_note.shared_with != request.user:
+            return Response(
+                {"detail": "You do not have permission to remove this note."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
         shared_note.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
