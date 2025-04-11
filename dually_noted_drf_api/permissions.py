@@ -22,13 +22,13 @@ class CanViewOrEditSharedNote(permissions.BasePermission):
     Shared user can:
     - View the shared note if they have permission.
     - Edit only if their permission is 'edit'.
+    - Delete (remove themselves) regardless of permission.
     Owner of the note can always view and modify.
     """
 
     def has_object_permission(self, request, view, obj):
-        # Defensive check to prevent misuse
         if not isinstance(obj, SharedNote):
-            return False  # Or raise a clear error if you'd prefer
+            return False
 
         user = request.user
         is_owner = obj.note.user == user
@@ -41,10 +41,13 @@ class CanViewOrEditSharedNote(permissions.BasePermission):
             return True
 
         if (
-            request.method not in permissions.SAFE_METHODS
+            request.method in ["PUT", "PATCH"]
             and is_shared_user
-            and obj.permission == 'edit'
+            and obj.permission == "edit"
         ):
+            return True
+
+        if request.method == "DELETE" and is_shared_user:
             return True
 
         return False
