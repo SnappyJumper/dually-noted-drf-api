@@ -74,7 +74,7 @@ class SharedNoteSerializer(serializers.ModelSerializer):
                 "note": "You can only share notes that you own."
             })
 
-        if note.sharednote_set.filter(shared_with=shared_with).exists():
+        if note.shared_notes.filter(shared_with=shared_with).exists():
             raise serializers.ValidationError({
                 "shared_with": "This user already has access to the note."
             })
