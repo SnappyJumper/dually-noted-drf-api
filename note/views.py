@@ -33,7 +33,9 @@ class NoteList(APIView):
         )
         if serializer.is_valid():
             serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(
+                serializer.data, status=status.HTTP_201_CREATED
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -72,31 +74,31 @@ class NoteDetail(APIView):
 class SharedNoteList(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        # Only show notes that are shared *with* the current user
-        shared_notes = SharedNote.objects.filter(
-            shared_with=request.user
-        )
-        serializer = SharedNoteDetailSerializer(
-            shared_notes, many=True, context={'request': request}
-        )
-        return Response(serializer.data)
-
     def post(self, request):
         serializer = SharedNoteSerializer(
             data=request.data,
             context={'request': request}
         )
-        if serializer.is_valid():
-            note = serializer.validated_data['note']
-            if note.user != request.user:
-                return Response(
-                    {"detail": "You can only share notes that you own."},
-                    status=status.HTTP_403_FORBIDDEN
-                )
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            if serializer.is_valid():
+                note = serializer.validated_data['note']
+
+                if note.user != request.user:
+                    return Response(
+                        {"detail": "You can only share notes that you own."},
+                        status=status.HTTP_403_FORBIDDEN
+                    )
+
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+            print("❌ Validation errors:", serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            print("🔥 Exception in POST /shared-notes/:", str(e))
+            return Response({"detail": "Server error occurred."}, status=500)
 
 
 class SharedNoteDetail(APIView):
