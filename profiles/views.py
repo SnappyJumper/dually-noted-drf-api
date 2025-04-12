@@ -1,10 +1,12 @@
 from django.http import Http404
 from rest_framework import status
-from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from dually_noted_drf_api.permissions import IsOwnerOrReadOnly
+
 from .models import UserProfile
 from .serializers import UserProfileSerializer
-from dually_noted_drf_api.permissions import IsOwnerOrReadOnly
 
 
 class ProfileList(APIView):

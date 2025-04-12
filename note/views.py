@@ -1,20 +1,17 @@
+from django.db.models import Q
 from django.http import Http404
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.db.models import Q
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from dually_noted_drf_api.permissions import (CanViewOrEditSharedNote,
+                                              IsNoteOwner)
+
 from .models import Note, SharedNote, Tag
-from .serializers import (
-    NoteSerializer,
-    SharedNoteSerializer,
-    TagSerializer,
-    SharedNoteDetailSerializer,
-)
-from dually_noted_drf_api.permissions import (
-    IsNoteOwner, CanViewOrEditSharedNote
-)
+from .serializers import (NoteSerializer, SharedNoteDetailSerializer,
+                          SharedNoteSerializer, TagSerializer)
 
 
 class NoteList(APIView):

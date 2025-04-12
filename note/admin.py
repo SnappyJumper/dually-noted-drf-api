@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Note, Tag, SharedNote
+
+from .models import Note, SharedNote, Tag
 
 # Register your models with the Django admin site.
 # This allows them to be managed through the Django admin interface.
