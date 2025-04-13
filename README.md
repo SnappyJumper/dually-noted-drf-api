@@ -39,7 +39,7 @@ The objective of this API is to provide a secure and fast way of providing data 
 
 To create my entity relationship diagram, I used [DrawSQL](https://drawsql.app/) to display my models in an easy to understand display. This diagram shows the relationship between all my different models.
 
-![Entity Relationship Diagram](documentation/design-images/entity_relationship.png)
+![Entity Relationship Diagram](documentation/design_images/entity_relationship.png)
 
 [Back to top](#table-of-contents)
 
@@ -142,11 +142,11 @@ Ive been using [Flake8](https://flake8.pycqa.org/en/latest/) for code validation
 
 I did have two issues by the time of deployment but one involves the testing file which was created when the project was first initailaised and I havent used. 
 
-![Test File Flake8](documentation/test-images/test_flake8.png)
+![Test File Flake8](documentation/test_images/test_flake8.png)
 
 The other issue was a scoping issue as Flake8 couldn't recognise the use of env in this file.
 
-![Settings File Flake8](/documentation/test-images/env_flake8.png)
+![Settings File Flake8](/documentation/test_images/env_flake8.png)
 
 I also used [isort](https://pycqa.github.io/isort/) to organise my imports
 
@@ -221,4 +221,354 @@ First of all we create a new repository in [GitHub](https://github.com/).
 - Go to [GitHub](https://github.com/).
 - Create a new repo with no template.
 
-Once the new repo has been created you'll need to pull it down into your local machine
+Once the new repo has been created you'll need to pull it down into your local machine. I used [VSCode](https://code.visualstudio.com/) to create my code so I will be describing the VSCode way here.
+
+- Copy either the "create new repo on the command line code" or the "push an existing repo from the command line code". I will use the latter here
+
+![GitHub Options](documentation/deployment/github_options.png)
+
+Now within VSCode in a new folder for your project we need to open a command prompt to pull the empty repo in/
+
+- Create a new project on VSCode and save it to where you require it on your machine.
+- Open a new terminal and paste the code you copied earlier and run it to connect VSCode to GitHub.
+
+Now we need to install Django and some other packages
+
+- In the terminal run ```pip install 'django<4'```
+- Create the new project by running ```django-admin startproject <your_app_name_here>``` 
+- Next run ```pip install django-cloudinary-storage``` and ```pip install Pillow``` to install cloudinary storage and pillo separately.
+
+Now our new installed apps need to be added to our ```settings.py``` file
+
+![Installed Apps](documentation/deployment/installed_apps.png)
+
+The next thing to do is create a new ```env.py``` file at the root level and paste in the following
+
+```Python
+import os
+
+os.environ["CLOUDINARY_URL"] = "YOUR_CLOUDINARY_URL_HERE"
+
+```
+
+Where you paste in your actual CLOUDINARY_URL.
+
+Back in ```settings.py``` we have to import your ```env.py``` provided it exists.
+
+```Python
+import os
+
+if os.path.exists("env.py"):
+    import env
+```
+
+Followed by our new CLOUDINARY URL
+
+```Python
+CLOUDINARY_STORAGE = {"CLOUDINARY_URL": os.environ.get("CLOUDINARY_URL")}
+```
+
+After that you must define the MEDIA_URL and DEFAULT_FILE_STORAGE in ```settings.py```
+
+```Python
+MEDIA_URL = "/media/"
+
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+```
+
+Now feel free to start developing your application remembering to store each new app in the installed app section of ```settings.py```
+
+Once youre ready to deploy your project start bt installing JSON Web Token Authentication
+
+- in the terminal run ```pip install dj-rest-auth```
+
+add rest framework's auth token and django rest auth to installed apps
+
+```Python
+INSTALLED_APPS = [
+    "rest_framework.authtoken",
+    "dj_rest_auth",
+]
+```
+
+and add the auth urls to your urlpatterns list
+
+```Python
+urlpatterns = [
+    path("dj-rest-auth/", include("dj_rest_auth.urls")),
+]
+```
+
+Migrate the database ```python manage.py migrate```
+
+Next run ```pip install 'dj-rest-auth[with_social]'``` and add the following to installed apps
+
+```Python
+INSTALLED_APPS = [
+    "django.contrib.sites",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "dj_rest_auth.registration",
+]
+```
+
+Add a SITE_ID variable to ```settings.py```
+
+```Python
+SITE_ID = 1
+```
+
+And the registration urls to the urlpatterns list
+
+```Python
+urlpatterns = [
+    path('dj-rest-auth/registration/', include('dj_rest_auth.registration.urls')),
+]
+```
+
+Then its time to install JWT tokens functionality
+
+- run ```pip install djangorestframework-simplejwt``` in the terminal
+
+Add the following to ```env.py```
+
+```Python
+os.environ['DEV'] = '1'
+```
+
+In ```settings.py``` set DEBUG to DEV
+
+```Python
+DEBUG = 'DEV' in os.environ
+```
+
+Next, staying in ```settings.py``` add the following code
+
+```Python
+REST_PAGINATION = "rest_framework.pagination.PageNumberPagination"
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        (
+            "rest_framework.authentication.SessionAuthentication"
+            if "DEV" in os.environ
+            else "dj_rest_auth.jwt_auth.JWTCookieAuthentication"
+        )
+    ],
+    "DEFAULT_PAGINATION_CLASS": REST_PAGINATION,
+    "PAGE_SIZE": 100,
+    "DATETIME_FORMAT": "%d %b %Y",
+}
+```
+
+This differenciates between dev and prod mode and sets pagination settings and date and time format.
+
+After that place the following code in ```settings.py``` to enable token auth, cookie declaration and to send tokens via HTTPS
+
+```Python
+REST_USE_JWT = True
+JWT_AUTH_SECURE = True
+JWT_AUTH_COOKIE = "my-app-auth"
+JWT_AUTH_REFRESH_COOKIE = "my-refresh-token"
+JWT_AUTH_SAMESITE = "None"
+```
+
+Now we create a root route to act as a welcome screen for visitors to our api
+
+- In your main project folder create a new ```views.py``` file and in it add the following
+
+```Python
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+
+@api_view()
+def root_route(request):
+    """
+    Welcome message
+    upon loading the API
+    """
+    return Response({"message": "Welcome!"})
+```
+
+Add that new route to the urlpatterns list in the main ```urls.py``` file
+
+```Python
+from .views import root_route
+
+    path("", root_route),
+```
+
+Now we head over to [Code Institute PostgreSQL](https://dbs.ci-dbs.net/) and enter our details to be emailed a URL to our new database. Copy the URL
+
+Back in our local project, open the ```env.py``` file and paste the following
+
+```Python
+os.environ.setdefault(
+    "DATABASE_URL", "<YOUR_DB_URL_HERE>",
+)
+```
+
+Now run ```pip install dj_database_url``` in your terminal and once thats done import it to ```settings.py```
+
+```Python
+import dj_database_url
+```
+
+After that we separate our dev and prod databases like so
+
+```Python
+if "DEV" in os.environ:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+else:
+    DATABASES = {"default": dj_database_url.parse(
+        os.environ.get("DATABASE_URL"))}
+    print("Connected to live database")
+```
+
+Once that's been added install gunicorn
+
+- in the terminal type ```pip install gunicorn```
+
+Then create a new ```Procfile``` at the root level of the project
+
+![Procfile Location](documentation/deployment/procfile.png)
+
+Inside the ```Procfile``` add the following to show Heroku how to run your project
+
+```Python
+release: python manage.py makemigrations && python manage.py migrate
+web: gunicorn drf_api_league_hub.wsgi
+```
+
+Then in ```settings.py``` add 
+
+```Python
+ALLOWED_HOSTS = [
+    os.environ.get("ALLOWED_HOST"),
+    "127.0.0.1",
+]
+```
+
+This assigns the hosts allowed for your project
+
+Now to install Cors Headers
+
+- Run ```pip install django-cors-headers``` in the terminal
+- Then add to installed apps
+
+```Python
+INSTALLED_APPS = [
+    'corsheaders',
+]
+```
+
+- Then add it to the TOP of ```MIDDLEWARE``` also (Must be at the top!!)
+
+```Python
+MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
+]
+```
+
+Now, still in ```settings.py``` we need to set the ```ALLOWED_ORIGINS```
+
+```Python
+if "CLIENT_ORIGIN" in os.environ:
+    CORS_ALLOWED_ORIGINS = [
+        os.environ.get("CLIENT_ORIGIN"),
+    ]
+if "CLIENT_ORIGIN_DEV" in os.environ:
+    CORS_ALLOWED_ORIGINS.append(os.environ.get("CLIENT_ORIGIN_DEV"))
+
+CORS_ALLOW_CREDENTIALS = True
+
+JWT_AUTH_SAMESITE = 'None'
+```
+
+Then replace the ```SECRET_KEY``` vaue with a custom one
+
+- In ```env.py``` add and fill in your new secret key value
+
+```Python
+os.environ.setdefault("SECRET_KEY", "<YOUR SECRET KEY HERE>")
+```
+
+Then, back in ```settings.py``` change the secret key to point to the value you set in ```env.py```
+
+```Python
+SECRET_KEY = os.getenv("SECRET_KEY")
+```
+
+Update all the requirements to a ```requirements.txt``` file
+
+- run pip freeze > requirements.txt in the terminal
+
+Now Add, Commit and Push your changes
+
+Now you have to set everything up Heroku side.
+
+- Go to [Heroku](https://www.heroku.com)
+- Go to your dashboard and click New and Create new app
+
+![Create New App](documentation/deployment/create_new_app.png)
+
+- Fill in the relevant info and chose the nationality that corresponds to you or as close as.
+- Then click create app
+
+Now that you have created your app you need to create ```Config_Vars```
+
+- Navigate to the apps settings and click Reveal Config Vars
+
+- Fill in the following
+
+    - ALLOWED_HOST - This is the URL of your deployed project (without the https)
+    - CLIENT_ORIGIN - This is the URL of your deployed front-end project
+    - CLIENT_ORIGIN_DEV - This is the URL when developing locally
+    - CLOUDINARY_URL - This is your Cloudinary API key
+    - DATABASE_URL - This is your production database URL
+    - DISABLE_COLLECTSTATIC - This will be removed before submission
+    - SECRET_KEY - This is the secret key you have created
+
+Now to link our heroku app to our GitHub repo
+
+- Navigate to the Deplou Tab in your Heroku app
+- Choose GitHub
+- Find your repo
+- Click connect
+
+Once that's done you're finally able to deploy, Click on deploy branch to Deploy your project
+
+Wait for Build and then a button should appear to take you to your site.
+
+[Back to top](#table-of-contents)
+
+# Credits
+
+### Content
+
+This project was inspired by the Moments project and DRF API walkthrough from [Code Institute](https://codeinstitute.net/)
+The models were altered and modified to suit Dually Noted.
+
+I used the [Django REST Framework Documentation](https://www.django-rest-framework.org/api-guide/permissions/) to help put this together as well as [Stack Overflow](https://stackoverflow.com/questions) and [ChatGPT](https://openai.com/index/chatgpt/) for help with Debugging and answering questions.
+
+# Acknowledgements
+
+I enjoyed the process of making this project and found it a real step-up from Project 4. I hope to be able to encorporate all I've learned here into a bright future career.
+
+I would like to thank
+
+- Marcel for all his guidance and help this past year.
+- My partner for her love, care and for putting up with my mood swings!
+- My parents for their love and guidance.
+- To Code Institute and it's fantastic Slack community for helping me achieve my goals and change career.
+
+Thank You All!
+
+[Back to top](#table-of-contents)
