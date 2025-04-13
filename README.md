@@ -107,3 +107,35 @@ This model manages the relationship between notes and who they are shared with.
 | permission                   | CharField       | max_length=10, choices=permission_choices, default='read'     |
 | shared_at                    | DateTimeField   | auto_now_add=True                                             |
 
+[Back to top](#table-of-contents)
+
+# Testing
+
+- ## Manual Testing
+
+| Application | Endpoint                         | Expected Result                                                                              | Pass/Fail |
+| ----------- | -------------------------------- | -------------------------------------------------------------------------------------------- | --------- |
+| Notes       | /notes/                          | Returns a list of all notes owned by the authenticated user                                  | Pass      |
+| Notes	      | /notes/	                         | POST request creates a new note with valid title, content, and optional tags                 | Pass      |
+| Notes	      | /notes/int:pk/                   | Returns a single note by ID if owned by the requesting user                                  | Pass      |
+| Notes       | /notes/int:pk/                   | PUT request updates the note only if user is the owner                                       | Pass      |
+| Notes	      | /notes/int:pk/                   | DELETE request deletes the note only if user is the owner                                    | Pass      |
+| Tags	      | /tags/                           | Returns a list of all tags ordered by creation date                                          | Pass      |
+| Tags        | /tags/	                         | POST request creates a new tag if the name is unique	                                        | Pass      |
+| Tags        | /tags/int:pk/                    | Returns a single tag with its name and associated notes	                                    | Pass      |
+| Tags	      | /tags/int:pk/                    | PUT request updates tag name if valid and unique	                                            | Pass      |
+| Tags	      | /tags/int:pk/                    | DELETE request deletes the tag if it exists	                                                | Pass      |
+| SharedNotes |	/shared-notes/                   | Returns a list of notes shared with the authenticated user	                                | Pass      |
+| SharedNotes |	/shared-notes/                   | POST request shares a note with another user and permission level	                        | Pass      |
+| SharedNotes |	/shared-notes/int:pk/            | GET returns a shared note only if user is the recipient	                                    | Pass      |
+| SharedNotes |	/shared-notes/int:pk/            | PUT updates shared note content if user has 'edit' permission	                            | Pass      |
+| SharedNotes |	/shared-notes/int:pk/            | DELETE removes the share link for the user (self-removal)	                                | Pass      |
+| Profiles    |	/profiles/                       | Returns a list of all user profiles	                                                        | Pass      |
+| Profiles    |	/profiles/int:pk/                | GET returns profile data including name, bio, and profile_picture	                        | Pass      |
+| Profiles    |	/profiles/int:pk/                | PUT updates profile if the authenticated user is the profile owner	                        | Pass      |
+| Profiles    |	/profiles/username/str:username/ | Returns profile data by username (used for shared note ownership linking)	                | Pass      |
+
+
+- ## PEP8 Validation
+
+Ive been using [Flake8]
