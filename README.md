@@ -138,4 +138,87 @@ This model manages the relationship between notes and who they are shared with.
 
 - ## PEP8 Validation
 
-Ive been using [Flake8]
+Ive been using [Flake8](https://flake8.pycqa.org/en/latest/) for code validation in Python. This enabled me to stay ontop of my code validation throughout the duration of the project.
+
+I did have two issues by the time of deployment but one involves the testing file which was created when the project was first initailaised and I havent used. 
+
+![Test File Flake8](documentation/test-images/test_flake8.png)
+
+The other issue was a scoping issue as Flake8 couldn't recognise the use of env in this file.
+
+![Settings File Flake8](/documentation/test-images/env_flake8.png)
+
+I also used [isort](https://pycqa.github.io/isort/) to organise my imports
+
+- ## Bugs Fixed
+
+During testing I discovered that there was an issue when a user tried to remove themselves from a note another person shared with them, when their permissions were set to Read Only.
+
+To fix this issue I had to fix the permission logic to allow the ```shared_with``` user to delete the shared note relationship.
+
+- ## Bugs Unresolved
+
+As far as I'm aware, after testing there are no major unresolved bugs at time of writing.
+
+[Back to top](#table-of-contents)
+
+# Technologies Used
+
+## Languages
+
+[Python](https://www.python.org/) was used for my back end language.
+
+## Libraries and Frameworks
+
+[Django](https://www.djangoproject.com/) was used as my back end python framework. It enabled me to rapidly develop my back end with a clean and pragmatic design.
+
+[Django Rest Framework](https://www.django-rest-framework.org/) was used to build my back end Web APIs. It is a versitile and strong toolkit.
+
+## Packages
+- [asgiref](https://pypi.org/project/asgiref/) Supports Django’s asynchronous features (ASGI interface)
+- [certifi](https://pypi.org/project/certifi/) Provides Mozilla’s CA Bundle for HTTPS requests
+- [charset-normalizer](https://pypi.org/project/charset-normalizer/) Detects and decodes text encoding in HTTP responses
+- [cloudinary](https://pypi.org/project/cloudinary/) Python SDK for managing media uploads and delivery with Cloudinary
+- [defusedxml](https://pypi.org/project/defusedxml/) Safely parses XML in Python (protection from vulnerabilities)
+- [dj-database-url](https://pypi.org/project/dj-database-url/) Parses database URLs (used for environment-based DB config on Heroku)
+- [dj-rest-auth](https://pypi.org/project/dj-rest-auth/) Prebuilt auth endpoints (login, logout, register, password reset, etc.)
+- [django-allauth](https://pypi.org/project/django-allauth/) Full-featured authentication system (social logins, email verification)
+- [django-cloudinary-storage](https://pypi.org/project/django-cloudinary-storage/) Integrates Cloudinary with Django’s storage backend
+- [django-cors-headers](https://pypi.org/project/django-cors-headers/)Enables Cross-Origin Resource Sharing (CORS) for API access from frontend
+- [djangorestframework_simplejwt](https://pypi.org/project/djangorestframework-simplejwt/) Adds JWT authentication to Django REST Framework
+- [gunicorn](https://pypi.org/project/gunicorn/) WSGI HTTP server for running Django in production (e.g., on Heroku)
+- [idna](https://pypi.org/project/idna/) Handles internationalized domain names
+- [oauthlib](https://pypi.org/project/oauthlib/) Implements OAuth 1 and 2 for secure user authorization
+- [Pillow](https://pypi.org/project/Pillow/) Adds support for image processing and uploads
+- [psycopg2](https://pypi.org/project/psycopg2/) PostgreSQL adapter for Django
+- [pycparser](https://pypi.org/project/pyparsing/) Required for building C-based packages (used by cffi)
+- [PyJWT](https://pypi.org/project/PyJWT/) JSON Web Token implementation for encoding/decoding user tokens
+- [pytz](https://pypi.org/project/pytz/) Timezone definitions and conversions (used in Django time handling)
+- [requests](https://pypi.org/project/requests/) Simplified HTTP requests (used in auth, API calls, etc.)
+- [requests-oauthlib](https://pypi.org/project/requests-oauthlib/) OAuth support for Python requests
+- [six](https://pypi.org/project/six/) Python 2 and 3 compatibility utility
+- [sqlparse](https://pypi.org/project/sqlparse/) Parses and formats SQL (used by Django for migrations)
+- [urllib3](https://pypi.org/project/urllib3/) Powerful HTTP client library for Python
+- [whitenoise](https://whitenoise.readthedocs.io/en/stable/django.html) Serves static files directly in production without needing a CDN
+
+## Other Tools
+
+- [VSCode](https://code.visualstudio.com/) Where the code was created and edited.
+- [GitHub](https://github.com/) Used as a repository for the code.
+- [GitBash](<https://en.wikipedia.org/wiki/Bash_(Unix_shell)>) Used in the terminal to push to GitHub repository.
+- [Heroku](https://dashboard.heroku.com) Used to deploy the back end.
+- [Cloudinary](https://cloudinary.com/) Used to host the static files.
+- [Virutal Environment](https://docs.python.org/3/library/venv.html) Used for creating the virtual enviroment.
+
+[Back to top](#table-of-contents)
+
+# Deployment to Heroku
+
+The back-end was deployed to [Heroku](https://www.heroku.com) and was done as follows
+
+First of all we create a new repository in [GitHub](https://github.com/).
+
+- Go to [GitHub](https://github.com/).
+- Create a new repo with no template.
+
+Once the new repo has been created you'll need to pull it down into your local machine
