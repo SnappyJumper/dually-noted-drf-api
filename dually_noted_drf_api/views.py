@@ -14,17 +14,33 @@ def root_route(request):
     understand how to access major parts of the application.
     """
     return Response({
-        'profiles': '/api/profiles/',
-        'notes': '/api/notes/',
-        'shared_notes': '/api/shared_notes/',
-        'tags': '/api/tags/',
-        'auth': {
-            'login': '/api/auth/login/',
-            'logout': '/api/auth/logout/',
-            'register': '/api/auth/register/',
-            'password_reset': '/api/auth/password/reset/',
-            'password_change': '/api/auth/password/change/'
-        }
+        "profiles": {
+            "list": "/profiles/",
+            "detail": "/profiles/<int:pk>/",
+            "by_username": "/profiles/username/<str:username>/",
+        },
+        "notes": {
+            "list": "/notes/",
+            "detail": "/notes/<int:pk>/",
+        },
+        "shared_notes": {
+            "list": "/shared-notes/",
+            "detail": "/shared-notes/<int:pk>/",
+        },
+        "tags": {
+            "list": "/tags/",
+            "detail": "/tags/<int:pk>/",
+        },
+        "auth": {
+            "login": "/dj-rest-auth/login/",
+            "logout": "/dj-rest-auth/logout/",
+            "register": "/dj-rest-auth/registration/",
+            "password_reset": "/dj-rest-auth/password/reset/",
+            "password_change": "/dj-rest-auth/password/change/",
+            "user": "/dj-rest-auth/user/",  # Current authenticated user
+        },
+        "api_docs": "/api-auth/",  # DRF browsable API login/logout
+        "admin": "/admin/",
     })
 
 
