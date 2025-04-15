@@ -444,7 +444,7 @@ Inside the ```Procfile``` add the following to show Heroku how to run your proje
 
 ```Python
 release: python manage.py makemigrations && python manage.py migrate
-web: gunicorn drf_api_league_hub.wsgi
+web: gunicorn <YOUR_APP_NAME>.wsgi
 ```
 
 Then in ```settings.py``` add 
